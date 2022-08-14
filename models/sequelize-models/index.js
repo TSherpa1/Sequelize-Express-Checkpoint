@@ -33,6 +33,62 @@ const Owner = db.define('Owner', {
 Task.belongsTo(Owner);
 Owner.hasMany(Task);
 
+Task.clearCompleted = async function () {
+  await Task.destroy({
+    where: {
+      complete: true,
+    },
+  });
+};
+
+Task.completeAll = async function () {
+  await Task.update(
+    { complete: true },
+    {
+      where: {
+        complete: false,
+      },
+    }
+  );
+};
+
+Task.prototype.getTimeRemaining = function () {
+  const date = new Date();
+  if (this.due) {
+    return this.due - date;
+  }
+  return Infinity;
+};
+
+Task.prototype.isOverdue = function () {
+  if (this.getTimeRemaining() < 0 && this.complete === false) {
+    return true;
+  }
+  return false;
+};
+
+Task.prototype.assignOwner = async function (owner) {
+  return await this.setOwner(owner);
+};
+
+Owner.getOwnersAndTasks = async function () {
+  return await Owner.findAll({ include: Task });
+};
+
+//you can use where clauses in magic methods the same way you do with model queries
+Owner.prototype.getIncompleteTasks = async function () {
+  return await this.getTasks({
+    where: {
+      complete: false,
+    },
+  });
+};
+
+Owner.beforeDestroy(function (owner) {
+  if (owner.name === 'Grace Hopper') {
+    throw new Error('Cannot delete instances named Grace Hopper');
+  }
+});
 
 //---------^^^---------  your code above  ---------^^^----------
 
