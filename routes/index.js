@@ -19,7 +19,23 @@ router.get('/:name/tasks', async (req, res, next) => {
   try {
     if (await todos.exists(req.params.name)) {
       let tasks = await todos.list(req.params.name);
-      res.status(200).send(tasks);
+      if (req.query.status) {
+        if (req.query.status === 'complete') {
+          let queryFilteredTask = tasks.filter((task) => {
+            //console.log(task.complete);
+            return task.complete === true;
+          });
+          //console.log(queryFilteredTask);
+          res.status(200).send(queryFilteredTask);
+        } else {
+          let queryFilteredTask = tasks.filter((task) => {
+            return task.complete === false;
+          });
+          res.status(200).send(queryFilteredTask);
+        }
+      } else {
+        res.status(200).send(tasks);
+      }
     } else {
       res.status(404).send('<h1>Name not found</h1>');
     }

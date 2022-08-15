@@ -77,6 +77,9 @@ Owner.getOwnersAndTasks = async function () {
 
 //you can use where clauses in magic methods the same way you do with model queries
 Owner.prototype.getIncompleteTasks = async function () {
+  //log out the methods of whatever you attach '__proto__' to
+  //console.log(this.__proto__);
+
   return await this.getTasks({
     where: {
       complete: false,
